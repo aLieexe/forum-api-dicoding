@@ -11,20 +11,20 @@
             "server": "localhost",
             "port": 5432,
             "driver": "PostgreSQL",
-            "name": "authapi",
-            "database": "authapi",
-            "username": "dicoding",
-            "password": "1234"
+            "name": "forum-api",
+            "database": "forumapi",
+            "username": "developer",
+            "password": "supersecretpassword"
         },
         {
             "previewLimit": 50,
             "server": "localhost",
             "port": 5432,
             "driver": "PostgreSQL",
-            "name": "authapi_test",
-            "database": "authapi_test",
-            "username": "dicoding",
-            "password": "1234"
+            "name": "forum-api-test",
+            "database": "forumapi_test",
+            "username": "developer",
+            "password": "supersecretpassword"
         }
     ],
 }

@@ -1,4 +1,5 @@
 /* istanbul ignore file */
+const Jwt = require('@hapi/jwt');
 const pool = require('../src/Infrastructures/database/postgres/pool');
 
 const UsersTableTestHelper = {
@@ -26,6 +27,21 @@ const UsersTableTestHelper = {
   async cleanTable() {
     await pool.query('DELETE FROM users WHERE 1=1');
   },
+
+  async getAccessTokenForTestUser() {
+    await this.addUser({});
+
+    const token = Jwt.token.generate(
+      {
+        id: 'user-123',
+        username: 'dicoding',
+      },
+      process.env.ACCESS_TOKEN_KEY,
+    );
+
+    return token;
+  },
+
 };
 
 module.exports = UsersTableTestHelper;

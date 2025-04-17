@@ -8,6 +8,7 @@
     "format": "eslint . --fix",
     "start": "node src/app.js",
     "start:dev": "nodemon src/app.js",
+    "dev": "node --watch --env-file=.env src/app.js",
     "test": "jest --setupFiles dotenv/config -i",
     "test:watch:change": "jest --watch --setupFiles dotenv/config -i",
     "test:watch": "jest --watchAll --coverage --setupFiles dotenv/config -i",
