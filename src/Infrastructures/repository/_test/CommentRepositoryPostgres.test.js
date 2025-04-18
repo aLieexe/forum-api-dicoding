@@ -4,15 +4,16 @@ const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 
 const AddComment = require('../../../Domains/comments/entities/AddComment');
-const AddThread = require('../../../Domains/threads/entities/AddThread');
-const RegisterUser = require('../../../Domains/users/entities/RegisterUser');
+// const AddThread = require('../../../Domains/threads/entities/AddThread');
+// const RegisterUser = require('../../../Domains/users/entities/RegisterUser');
 
-const ThreadRepositoryPostgres = require('../ThreadRepositoryPostgres');
-const UserRepositoryPostgres = require('../UserRepositoryPostgres');
+// const ThreadRepositoryPostgres = require('../ThreadRepositoryPostgres');
+// const UserRepositoryPostgres = require('../UserRepositoryPostgres');
 const CommentRepositoryPostgres = require('../CommentRepositoryPostgres');
 
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 const InvariantError = require('../../../Commons/exceptions/InvariantError');
+const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
 
 describe('Thread Repository Postgres test', () => {
   afterEach(async () => {
@@ -27,63 +28,29 @@ describe('Thread Repository Postgres test', () => {
 
   describe('add comment function', () => {
     it('should create a new commment in database', async () => {
-      // need to make a user, login it, create a new thread, then we can add comment
-      const fakeIdGenerator = () => 'rio123';
+      // need to make a user, create a new thread
+      await UsersTableTestHelper.addUser({});
+      await ThreadsTableTestHelper.addThread({});
 
-      // user setup
-      const registerUser = new RegisterUser({
-        username: 'dicoding',
-        password: 'secret_password',
-        fullname: 'Dicoding Indonesia',
-      });
-      const userRepositoryPostgres = new UserRepositoryPostgres(pool, fakeIdGenerator);
-
-      // Action
-      await userRepositoryPostgres.addUser(registerUser);
-
-      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
-
-      const threadToAdd = new AddThread({
-        title: 'rio is my wife',
-        body: 'legit my wife no cap',
-      }, 'user-rio123');
-
-      await threadRepositoryPostgres.addThreads(threadToAdd);
+      const fakeIdGenerator = () => '123';
 
       const commentToAdd = new AddComment({
         content: 'comment content',
-      }, 'user-rio123', 'thread-rio123');
+      }, 'user-123', 'thread-123');
 
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
 
       await commentRepositoryPostgres.addComment(commentToAdd);
-      const queryResult = await CommentsTableTestHelper.findCommentsById('comment-rio123');
+      const queryResult = await CommentsTableTestHelper.findCommentsById('comment-123');
       expect(queryResult).toHaveLength(1);
     });
 
     it('should not create a new comment due to thread not being found', async () => {
-      // need to make a user, login it, create a new thread, then we can add comment
-      const fakeIdGenerator = () => 'rio123';
+      // need to make a user, create a new thread
+      await UsersTableTestHelper.addUser({});
+      await ThreadsTableTestHelper.addThread({});
 
-      // user setup
-      const registerUser = new RegisterUser({
-        username: 'dicoding',
-        password: 'secret_password',
-        fullname: 'Dicoding Indonesia',
-      });
-      const userRepositoryPostgres = new UserRepositoryPostgres(pool, fakeIdGenerator);
-
-      // Action
-      await userRepositoryPostgres.addUser(registerUser);
-
-      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
-
-      const threadToAdd = new AddThread({
-        title: 'rio is my wife',
-        body: 'legit my wife no cap',
-      }, 'user-rio123');
-
-      await threadRepositoryPostgres.addThreads(threadToAdd);
+      const fakeIdGenerator = () => '123';
 
       const commentToAdd = new AddComment({
         content: 'comment content',
@@ -118,6 +85,79 @@ describe('Thread Repository Postgres test', () => {
       await expect(commentRepository.addComment(commentToAdd))
         .rejects
         .toThrow(InvariantError);
+    });
+  });
+
+  describe('verifyCommentAvailability Function', () => {
+    it('should pass when all is good', async () => {
+      await UsersTableTestHelper.addUser({});
+      await ThreadsTableTestHelper.addThread({});
+      await CommentsTableTestHelper.addComment({});
+
+      const fakeIdGenerator = () => '123';
+
+      const commentRepository = new CommentRepositoryPostgres(pool, fakeIdGenerator);
+      commentRepository.verifyCommentAvailability('comment-123', 'user-123');
+    });
+
+    it('should throw NotFoundError when comment is not found', async () => {
+      await UsersTableTestHelper.addUser({});
+      await ThreadsTableTestHelper.addThread({});
+      await CommentsTableTestHelper.addComment({});
+
+      const fakeIdGenerator = () => '123';
+
+      const commentRepository = new CommentRepositoryPostgres(pool, fakeIdGenerator);
+      await expect(commentRepository.verifyCommentAvailability('unfounded comment', 'user-123'))
+        .rejects.toThrow(NotFoundError);
+    });
+
+    it('should throw AuthorzationError when user doesnt have ownership', async () => {
+      await UsersTableTestHelper.addUser({});
+      await ThreadsTableTestHelper.addThread({});
+      await CommentsTableTestHelper.addComment({});
+
+      const fakeIdGenerator = () => '123';
+
+      const commentRepository = new CommentRepositoryPostgres(pool, fakeIdGenerator);
+      await expect(commentRepository.verifyCommentAvailability('comment-123', 'the unowning one'))
+        .rejects.toThrow(AuthorizationError);
+    });
+
+    it('should throw NotFoundError when comment is found, but already deleted (softly)', async () => {
+      await UsersTableTestHelper.addUser({});
+      await ThreadsTableTestHelper.addThread({});
+      await CommentsTableTestHelper.addComment({}, true);
+
+      const fakeIdGenerator = () => '123';
+
+      const commentRepository = new CommentRepositoryPostgres(pool, fakeIdGenerator);
+      await expect(commentRepository.verifyCommentAvailability('comment-123', 'user-123'))
+        .rejects.toThrow(NotFoundError);
+    });
+  });
+  describe('deleteCommentFunction', () => {
+    it('should succedd / pass', async () => {
+      await UsersTableTestHelper.addUser({});
+      await ThreadsTableTestHelper.addThread({});
+      await CommentsTableTestHelper.addComment({});
+
+      const fakeIdGenerator = () => '123';
+
+      const commentRepository = new CommentRepositoryPostgres(pool, fakeIdGenerator);
+      commentRepository.deleteComment('comment-123', 'thread-123');
+    });
+
+    it('should throw not found error', async () => {
+      await UsersTableTestHelper.addUser({});
+      await ThreadsTableTestHelper.addThread({});
+      await CommentsTableTestHelper.addComment({});
+
+      const fakeIdGenerator = () => '123';
+
+      const commentRepository = new CommentRepositoryPostgres(pool, fakeIdGenerator);
+      await expect(commentRepository.deleteComment('unfounded comment', 'user-123'))
+        .rejects.toThrow(NotFoundError);
     });
   });
 });
