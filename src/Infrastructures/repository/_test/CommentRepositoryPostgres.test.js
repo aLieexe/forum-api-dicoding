@@ -137,7 +137,7 @@ describe('Thread Repository Postgres test', () => {
     });
   });
   describe('deleteCommentFunction', () => {
-    it('should succedd / pass', async () => {
+    it('should succeed / pass', async () => {
       await UsersTableTestHelper.addUser({});
       await ThreadsTableTestHelper.addThread({});
       await CommentsTableTestHelper.addComment({});
@@ -145,7 +145,7 @@ describe('Thread Repository Postgres test', () => {
       const fakeIdGenerator = () => '123';
 
       const commentRepository = new CommentRepositoryPostgres(pool, fakeIdGenerator);
-      commentRepository.deleteComment('comment-123', 'thread-123');
+      await commentRepository.deleteComment('comment-123', 'thread-123');
     });
 
     it('should throw not found error', async () => {
@@ -158,6 +158,25 @@ describe('Thread Repository Postgres test', () => {
       const commentRepository = new CommentRepositoryPostgres(pool, fakeIdGenerator);
       await expect(commentRepository.deleteComment('unfounded comment', 'user-123'))
         .rejects.toThrow(NotFoundError);
+    });
+  });
+
+  describe('getCommentByThread', () => {
+    it('should pass', async () => {
+      await UsersTableTestHelper.addUser({});
+      await ThreadsTableTestHelper.addThread({});
+      await CommentsTableTestHelper.addComment({});
+
+      const fakeIdGenerator = () => '123';
+
+      const commentRepository = new CommentRepositoryPostgres(pool, fakeIdGenerator);
+
+      const result = await commentRepository.getCommentByThread('thread-123');
+      const data = result[0];
+
+      expect(data.id).toEqual('comment-123');
+      expect(data.username).toEqual('dicoding');
+      expect(data.content).toEqual('a content body');
     });
   });
 });

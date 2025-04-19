@@ -46,4 +46,22 @@ describe('Thread Repository Postgres test', () => {
       expect(threads).toHaveLength(1);
     });
   });
+
+  describe('GetThreadById', () => {
+    it('should pass', async () => {
+      await UsersTableTestHelper.addUser({});
+      await ThreadsTableTestHelper.addThread({});
+
+      const fakeIdGenerator = () => '123';
+
+      const commentRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+
+      const data = await commentRepository.getThreadById('thread-123');
+
+      expect(data.id).toEqual('thread-123');
+      expect(data.username).toEqual('dicoding');
+      expect(data.title).toEqual('a thread title');
+      expect(data.body).toEqual('a thread body');
+    });
+  });
 });
