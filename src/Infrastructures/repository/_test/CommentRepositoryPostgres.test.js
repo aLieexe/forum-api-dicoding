@@ -4,11 +4,6 @@ const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 
 const AddComment = require('../../../Domains/comments/entities/AddComment');
-// const AddThread = require('../../../Domains/threads/entities/AddThread');
-// const RegisterUser = require('../../../Domains/users/entities/RegisterUser');
-
-// const ThreadRepositoryPostgres = require('../ThreadRepositoryPostgres');
-// const UserRepositoryPostgres = require('../UserRepositoryPostgres');
 const CommentRepositoryPostgres = require('../CommentRepositoryPostgres');
 
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');

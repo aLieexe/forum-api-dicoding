@@ -7,6 +7,7 @@ const RegisterUser = require('../../../Domains/users/entities/RegisterUser');
 
 const ThreadRepositoryPostgres = require('../ThreadRepositoryPostgres');
 const UserRepositoryPostgres = require('../UserRepositoryPostgres');
+const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 
 describe('Thread Repository Postgres test', () => {
   afterEach(async () => {
@@ -62,6 +63,29 @@ describe('Thread Repository Postgres test', () => {
       expect(data.username).toEqual('dicoding');
       expect(data.title).toEqual('a thread title');
       expect(data.body).toEqual('a thread body');
+    });
+  });
+
+  describe('CheckIfThreadExist', () => {
+    it('should pass', async () => {
+      await UsersTableTestHelper.addUser({});
+      await ThreadsTableTestHelper.addThread({});
+
+      const fakeIdGenerator = () => '123';
+
+      const commentRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+
+      await commentRepository.checkIfThreadExist('thread-123');
+    });
+
+    it('should return 404', async () => {
+      await UsersTableTestHelper.addUser({});
+
+      const fakeIdGenerator = () => '123';
+
+      const commentRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+      await expect(commentRepository.checkIfThreadExist('thread-123'))
+        .rejects.toThrow(NotFoundError);
     });
   });
 });
