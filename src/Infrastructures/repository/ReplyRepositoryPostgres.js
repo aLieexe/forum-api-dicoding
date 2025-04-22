@@ -2,6 +2,7 @@ const ReplyRepository = require('../../Domains/replies/ReplyRepository');
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const InvariantError = require('../../Commons/exceptions/InvariantError');
 const AddedReply = require('../../Domains/replies/entities/AddedReply');
+const AuthorizationError = require('../../Commons/exceptions/AuthorizationError');
 
 class ReplyRepositoryPostgres extends ReplyRepository {
   constructor(pool, idGenerator) {
@@ -37,62 +38,63 @@ class ReplyRepositoryPostgres extends ReplyRepository {
     }
   }
 
-  // async verifyCommentAvailability(commentId, ownerId) {
-  //   const query = {
-  //     text: 'SELECT owner, is_deleted from comments WHERE id = $1',
-  //     values: [commentId],
-  //   };
+  async verifyReplyAvailability(replyId, ownerId) {
+    const query = {
+      text: 'SELECT owner, is_deleted from reply WHERE id = $1',
+      values: [replyId],
+    };
 
-  //   const queryResult = await this._pool.query(query);
+    const queryResult = await this._pool.query(query);
 
-  //   if (!queryResult.rowCount) {
-  //     throw new NotFoundError('resource tidak ditemukan');
-  //   }
+    if (!queryResult.rowCount) {
+      throw new NotFoundError('resource tidak ditemukan');
+    }
 
-  //   if (queryResult.rows[0].owner !== ownerId) {
-  //     throw new AuthorizationError('anda bukan merupakan owner comment');
-  //   }
+    if (queryResult.rows[0].owner !== ownerId) {
+      throw new AuthorizationError('anda bukan merupakan owner reply');
+    }
 
-  //   if (queryResult.rows[0].is_deleted !== false) {
-  //     throw new NotFoundError('comment sudah terhapus');
-  //   }
-  // }
+    if (queryResult.rows[0].is_deleted !== false) {
+      throw new NotFoundError('reply sudah terhapus');
+    }
+  }
 
-  // async deleteComment(commentId, threadId) {
-  //   const query = {
-  //     text: 'UPDATE comments SET is_deleted = true WHERE id = $1 AND thread_id =
-  // $2 RETURNING id',
-  //     values: [commentId, threadId],
-  //   };
+  async deleteReply(replyId) {
+    const query = {
+      text: 'UPDATE reply SET is_deleted = true WHERE id = $1 RETURNING id',
+      values: [replyId],
+    };
 
-  //   const queryResult = await this._pool.query(query);
-  //   if (!queryResult.rowCount) {
-  //     throw new NotFoundError('resource tidak ditemukan');
-  //   }
-  // }
+    const queryResult = await this._pool.query(query);
+    if (!queryResult.rowCount) {
+      throw new NotFoundError('resource tidak ditemukan');
+    }
+  }
 
-  // async getCommentByThread(threadId) {
-  //   const query = {
-  //     text: `SELECT
-  //               c.id,
-  //               u.username,
-  //               date,
-  //               CASE WHEN is_deleted THEN
-  //                 '**komentar telah dihapus**'
-  //               ELSE
-  //                 c.content
-  //               END AS content
-  //             FROM
-  //               comments c
-  //               JOIN users u ON c.owner = u.id
-  //             WHERE
-  //               c.thread_id = $1`,
-  //     values: [threadId],
-  //   };
+  async getReplyByComment(commentId) {
+    const query = {
+      text: `SELECT
+                r.id,
+                u.username,
+                date,
+                CASE WHEN is_deleted THEN
+                  '**balasan telah dihapus**'
+                ELSE
+                  r.content
+                END AS content
+              FROM
+                reply r
+                JOIN users u ON r.owner = u.id
+              WHERE
+                r.comment_id = $1
+              ORDER BY r.date ASC`,
+      values: [commentId],
+    };
 
-  //   const queryResult = await this._pool.query(query);
-  //   return queryResult.rows;
-  // }
+    const queryResult = await this._pool.query(query);
+
+    return queryResult.rows;
+  }
 }
 
 module.exports = ReplyRepositoryPostgres;
