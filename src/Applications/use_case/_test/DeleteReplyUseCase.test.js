@@ -21,8 +21,8 @@ describe('DeleteReplyUseCase', () => {
 
     // Assert
     expect(mockReplyRepository.verifyReplyAvailability)
-      .toHaveBeenCalledWith(replyId, ownerId);
+      .toHaveBeenCalledWith('reply-123', 'owner-123');
     expect(mockReplyRepository.deleteReply)
-      .toHaveBeenCalledWith(replyId);
+      .toHaveBeenCalledWith('reply-123');
   });
 });

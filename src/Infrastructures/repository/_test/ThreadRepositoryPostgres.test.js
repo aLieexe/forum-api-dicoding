@@ -64,6 +64,18 @@ describe('Thread Repository Postgres test', () => {
       expect(data.title).toEqual('a thread title');
       expect(data.body).toEqual('a thread body');
     });
+
+    it('should return not found', async () => {
+      await UsersTableTestHelper.addUser({});
+      await ThreadsTableTestHelper.addThread({});
+
+      const fakeIdGenerator = () => '123';
+
+      const commentRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+
+      await expect(commentRepository.getThreadById('id that wont be found'))
+        .rejects.toThrow(NotFoundError);
+    });
   });
 
   describe('CheckIfThreadExist', () => {

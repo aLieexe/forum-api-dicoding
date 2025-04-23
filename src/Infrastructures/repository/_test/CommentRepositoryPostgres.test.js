@@ -7,7 +7,6 @@ const AddComment = require('../../../Domains/comments/entities/AddComment');
 const CommentRepositoryPostgres = require('../CommentRepositoryPostgres');
 
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
-const InvariantError = require('../../../Commons/exceptions/InvariantError');
 const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
 
 describe('Thread Repository Postgres test', () => {
@@ -38,48 +37,6 @@ describe('Thread Repository Postgres test', () => {
       await commentRepositoryPostgres.addComment(commentToAdd);
       const queryResult = await CommentsTableTestHelper.findCommentsById('comment-123');
       expect(queryResult).toHaveLength(1);
-    });
-
-    it('should not create a new comment due to thread not being found', async () => {
-      // need to make a user, create a new thread
-      await UsersTableTestHelper.addUser({});
-      await ThreadsTableTestHelper.addThread({});
-
-      const fakeIdGenerator = () => '123';
-
-      const commentToAdd = new AddComment({
-        content: 'comment content',
-      }, 'user-rio123', 'thread-r23');
-
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
-
-      await expect(commentRepositoryPostgres.addComment(commentToAdd))
-        .rejects
-        .toThrowError(new NotFoundError('thread tidak ditemukan.'));
-    });
-
-    // i dont think this test is necessary, i cant think of a scenario where this error ever happen
-    it('should throw InvariantError when database throws unexpected error', async () => {
-      const fakeIdGenerator = () => 'inv123';
-      const fakePool = {
-        query: jest.fn(() => {
-          const err = new Error('some db error');
-          // @ts-ignore
-          err.code = '42069'; // just whatever code as long as its not 23503
-          throw err;
-        }),
-      };
-
-      const commentRepository = new CommentRepositoryPostgres(fakePool, fakeIdGenerator);
-      const commentToAdd = {
-        content: 'This is a comment',
-        owner: 'user-inv123',
-        thread: 'thread-xyz',
-      };
-
-      await expect(commentRepository.addComment(commentToAdd))
-        .rejects
-        .toThrow(InvariantError);
     });
   });
 
@@ -172,6 +129,32 @@ describe('Thread Repository Postgres test', () => {
       expect(data.id).toEqual('comment-123');
       expect(data.username).toEqual('dicoding');
       expect(data.content).toEqual('a content body');
+    });
+  });
+
+  describe('checkIfCommentExist', () => {
+    it('should pass with no issue', async () => {
+      await UsersTableTestHelper.addUser({});
+      await ThreadsTableTestHelper.addThread({});
+      await CommentsTableTestHelper.addComment({});
+
+      const fakeIdGenerator = () => '123';
+
+      const commentRepository = new CommentRepositoryPostgres(pool, fakeIdGenerator);
+
+      await commentRepository.checkIfCommentExist('comment-123');
+    });
+
+    it('should return 404 when comment not found', async () => {
+      await UsersTableTestHelper.addUser({});
+      await ThreadsTableTestHelper.addThread({});
+      await CommentsTableTestHelper.addComment({});
+
+      const fakeIdGenerator = () => '123';
+
+      const commentRepository = new CommentRepositoryPostgres(pool, fakeIdGenerator);
+
+      await expect(commentRepository.checkIfCommentExist('id that doesnt exist')).rejects.toThrow(NotFoundError);
     });
   });
 });

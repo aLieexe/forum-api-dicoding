@@ -41,44 +41,6 @@ describe('Reply repository postgres', () => {
       const queryResult = await ReplyTestTableHelper.findReplyById('reply-123');
       expect(queryResult).toHaveLength(1);
     });
-
-    it('should not create a new reply in the database', async () => {
-      await UsersTableTestHelper.addUser({});
-      await ThreadsTableTestHelper.addThread({});
-
-      const replyToAdd = new AddReply({
-        content: 'a reply content',
-      }, 'user-123', 'comment-123');
-
-      const fakeIdGenerator = () => '123';
-
-      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, fakeIdGenerator);
-
-      await expect(replyRepositoryPostgres.addReply(replyToAdd)).rejects.toThrow(NotFoundError);
-    });
-
-    it('should throw InvariantError when database throws unexpected error', async () => {
-      const fakeIdGenerator = () => 'inv123';
-      const fakePool = {
-        query: jest.fn(() => {
-          const err = new Error('some db error');
-          // @ts-ignore
-          err.code = '42069'; // just whatever code as long as its not 23503
-          throw err;
-        }),
-      };
-
-      const replyRepository = new ReplyRepositoryPostgres(fakePool, fakeIdGenerator);
-      const replyToAdd = {
-        content: 'this is a reply',
-        owner: 'user-inv123',
-        comment: 'comment-xyz',
-      };
-
-      await expect(replyRepository.addReply(replyToAdd))
-        .rejects
-        .toThrow(InvariantError);
-    });
   });
 
   describe('verify availability', () => {

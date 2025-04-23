@@ -63,15 +63,13 @@ describe('GetThreadById', () => {
     });
 
     await getThreadByIdUseCase.execute(threadId);
-    expect(mockThreadRepository.getThreadById).toBeCalledWith(threadId);
-    expect(mockCommentRepository.getCommentByThread).toBeCalledWith(threadId);
-    expect(mockReplyRepository.getReplyByComment).toBeCalledWith(mockComments[0].id);
-    expect(mockReplyRepository.getReplyByComment).toBeCalledWith(mockComments[1].id);
+    expect(mockThreadRepository.getThreadById).toBeCalledWith('thread-123');
+    expect(mockCommentRepository.getCommentByThread).toBeCalledWith('thread-123');
+    expect(mockReplyRepository.getReplyByComment).toBeCalledWith('comment-_pby2_tmXV6bcvcdev8xk');
+    expect(mockReplyRepository.getReplyByComment).toBeCalledWith('comment-yksuCoxM2s4MMrZJO-qVD');
   });
 
   it('Comment should be empty array', async () => {
-    const threadId = 'thread-123';
-
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
     const mockReplyRepository = new ReplyRepository();
@@ -95,8 +93,8 @@ describe('GetThreadById', () => {
       replyRepository: mockReplyRepository,
     });
 
-    await getThreadByIdUseCase.execute(threadId);
-    expect(mockThreadRepository.getThreadById).toBeCalledWith(threadId);
-    expect(mockCommentRepository.getCommentByThread).toBeCalledWith(threadId);
+    await getThreadByIdUseCase.execute('thread-123');
+    expect(mockThreadRepository.getThreadById).toBeCalledWith('thread-123');
+    expect(mockCommentRepository.getCommentByThread).toBeCalledWith('thread-123');
   });
 });

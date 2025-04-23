@@ -1,6 +1,5 @@
 const ReplyRepository = require('../../Domains/replies/ReplyRepository');
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
-const InvariantError = require('../../Commons/exceptions/InvariantError');
 const AddedReply = require('../../Domains/replies/entities/AddedReply');
 const AuthorizationError = require('../../Commons/exceptions/AuthorizationError');
 
@@ -20,22 +19,11 @@ class ReplyRepositoryPostgres extends ReplyRepository {
       text: 'INSERT INTO reply (id, owner, content, comment_id) VALUES ($1, $2, $3, $4) RETURNING id, content, owner',
       values: [id, owner, content, comment],
     };
+    const data = await this._pool.query(query);
 
-    try {
-      const data = await this._pool.query(query);
+    const addedReply = new AddedReply(data.rows[0]);
 
-      const addedReply = new AddedReply(data.rows[0]);
-
-      return addedReply;
-    } catch (err) {
-      // 23503 is postgres error code for foreign key violations
-      // https://www.postgresql.org/docs/current/errcodes-appendix.html
-
-      if (err.code === '23503') {
-        throw new NotFoundError('comment tidak ditemukan.');
-      }
-      throw new InvariantError(err.message);
-    }
+    return addedReply;
   }
 
   async verifyReplyAvailability(replyId, ownerId) {

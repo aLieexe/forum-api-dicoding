@@ -10,32 +10,32 @@ describe('AddThreadUseCase', () => {
       title: 'thread payload title',
     };
 
-    const ownerId = 'user-123';
-
-    const mockThread = new AddedThread({
-      id: 'thread-123',
-      title: useCasePayload.title,
-      owner: ownerId,
-    });
-
     const mockThreadRepository = new ThreadRepository();
-
     mockThreadRepository.addThreads = jest.fn()
-      .mockImplementation(() => Promise.resolve(mockThread));
+      .mockImplementation((addThread) => Promise.resolve(new AddedThread({
+        id: 'thread-123',
+        title: addThread.title,
+        owner: addThread.ownerId,
+      })));
 
     const addThreadUseCase = new AddThreadUseCase({
       threadRepository: mockThreadRepository,
     });
 
-    const addedThread = await addThreadUseCase.execute(useCasePayload, ownerId);
+    const addedThread = await addThreadUseCase.execute(useCasePayload, 'user-123');
+
+    const expectedUseCasePayload = {
+      body: 'thread payload body',
+      title: 'thread payload title',
+    };
 
     expect(addedThread).toStrictEqual(new AddedThread({
       id: 'thread-123',
-      title: useCasePayload.title,
-      owner: ownerId,
+      title: expectedUseCasePayload.title,
+      owner: 'user-123',
     }));
 
     // verifikasi fungsi yang di mocc
-    expect(mockThreadRepository.addThreads).toBeCalledWith(new AddThreads(useCasePayload, ownerId));
+    expect(mockThreadRepository.addThreads).toBeCalledWith(new AddThreads(expectedUseCasePayload, 'user-123'));
   });
 });
