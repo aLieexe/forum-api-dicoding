@@ -7,7 +7,6 @@ const ReplyRepositoryPostgres = require('../ReplyRepositoryPostgres');
 
 const pool = require('../../database/postgres/pool');
 const AddReply = require('../../../Domains/replies/entities/AddReply');
-const InvariantError = require('../../../Commons/exceptions/InvariantError');
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
 
