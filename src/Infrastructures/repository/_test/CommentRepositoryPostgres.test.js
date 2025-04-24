@@ -2,6 +2,7 @@ const pool = require('../../database/postgres/pool');
 const CommentsTableTestHelper = require('../../../../tests/CommentsTableTestHelper');
 const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
+const ReplyTableTestHelper = require('../../../../tests/ReplyTableTestHelper');
 
 const AddComment = require('../../../Domains/comments/entities/AddComment');
 const CommentRepositoryPostgres = require('../CommentRepositoryPostgres');
@@ -11,6 +12,7 @@ const AuthorizationError = require('../../../Commons/exceptions/AuthorizationErr
 
 describe('Thread Repository Postgres test', () => {
   afterEach(async () => {
+    await ReplyTableTestHelper.cleanTable();
     await CommentsTableTestHelper.cleanTable();
     await ThreadsTableTestHelper.cleanTable();
     await UsersTableTestHelper.cleanTable();
@@ -155,6 +157,39 @@ describe('Thread Repository Postgres test', () => {
       const commentRepository = new CommentRepositoryPostgres(pool, fakeIdGenerator);
 
       await expect(commentRepository.checkIfCommentExist('id that doesnt exist')).rejects.toThrow(NotFoundError);
+    });
+  });
+
+  describe('getRepliesFromComment', () => {
+    it('should return empty array if replies not found', async () => {
+      await UsersTableTestHelper.addUser({});
+      await ThreadsTableTestHelper.addThread({});
+      await CommentsTableTestHelper.addComment({});
+
+      const fakeIdGenerator = () => '123';
+
+      const commentRepository = new CommentRepositoryPostgres(pool, fakeIdGenerator);
+
+      const comments = await commentRepository.getCommentByThread('thread-123');
+
+      const data = await commentRepository.getRepliesFromComment(comments);
+      expect(data).toEqual([]);
+    });
+
+    it('should return an array of 1 reply  when reply is added', async () => {
+      await UsersTableTestHelper.addUser({});
+      await ThreadsTableTestHelper.addThread({});
+      await CommentsTableTestHelper.addComment({});
+      await ReplyTableTestHelper.addReply({});
+
+      const fakeIdGenerator = () => '123';
+
+      const commentRepository = new CommentRepositoryPostgres(pool, fakeIdGenerator);
+
+      const comments = await commentRepository.getCommentByThread('thread-123');
+
+      const data = await commentRepository.getRepliesFromComment(comments);
+      expect(data).toHaveLength(1);
     });
   });
 });

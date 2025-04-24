@@ -1,19 +1,29 @@
 class GetThreadByIdUseCase {
-  constructor({ threadRepository, commentRepository, replyRepository }) {
+  constructor({ threadRepository, commentRepository }) {
     this._threadRepository = threadRepository;
     this._commentRepository = commentRepository;
-    this._replyRepository = replyRepository;
   }
 
   async execute(threadId) {
     const thread = await this._threadRepository.getThreadById(threadId);
     const comments = await this._commentRepository.getCommentByThread(threadId) || [];
+    const replies = await this._commentRepository.getRepliesFromComment(comments);
 
-    await Promise.all(comments.map(async (comment) => {
-      comment.replies = await this._replyRepository.getReplyByComment(comment.id);
+    const formattedComments = comments.map((comment) => ({
+      id: comment.id,
+      username: comment.username,
+      date: comment.date,
+      content: comment.content,
+      replies: replies.filter((reply) => reply.comment_id === comment.id)
+        .map((reply) => ({
+          id: reply.id,
+          content: reply.content,
+          date: reply.date,
+          username: reply.username,
+        })),
     }));
 
-    thread.comments = comments;
+    thread.comments = formattedComments;
 
     return thread;
   }

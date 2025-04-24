@@ -34,7 +34,6 @@ exports.up = (pgm) => {
       references: 'comments(id)',
       notNull: true,
     },
-
   });
 };
 

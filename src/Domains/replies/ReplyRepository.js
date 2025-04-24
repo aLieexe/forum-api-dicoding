@@ -10,10 +10,6 @@ class ReplyRepository {
   async verifyReplyAvailability(replyId, ownerId) {
     throw new Error('REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
-
-  async getReplyByComment(commentId) {
-    throw new Error('REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED');
-  }
 }
 
 module.exports = ReplyRepository;

@@ -1,13 +1,11 @@
 const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 const CommentRepository = require('../../../Domains/comments/CommentRepository');
 const GetThreadByIdUseCase = require('../GetThreadByIdUseCase');
-const ReplyRepository = require('../../../Domains/replies/ReplyRepository');
 
 describe('GetThreadById', () => {
   it('Should orchestrate the getting of a thread successfully', async () => {
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
-    const mockReplyRepository = new ReplyRepository();
 
     mockThreadRepository.getThreadById = jest.fn()
       .mockImplementation(() => Promise.resolve({
@@ -24,24 +22,40 @@ describe('GetThreadById', () => {
         date: '2021-08-08T07:22:33.555Z',
         content: 'sebuah comment',
       }]));
-    mockReplyRepository.getReplyByComment = jest.fn()
-      .mockImplementation(() => Promise.resolve({
+
+    mockCommentRepository.getRepliesFromComment = jest.fn()
+      .mockImplementation(() => Promise.resolve([{
         id: 'reply-123',
         username: 'johndoe',
         date: '2021-08-08T07:22:33.555Z',
-        content: 'sebuah reply',
-      }));
+        content: 'sebuah comment',
+        comment_id: 'comment-123',
+      },
+      {
+        id: 'reply-234',
+        username: 'dicoding',
+        date: '2021-09-11T07:22:33.555Z',
+        content: 'sebuah comment dri dicoding',
+        comment_id: 'comment-123',
+      },
+      ]));
 
     const getThreadByIdUseCase = new GetThreadByIdUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
-      replyRepository: mockReplyRepository,
     });
+
+    const expectedComments = [{
+      id: 'comment-123',
+      username: 'johndoe',
+      date: '2021-08-08T07:22:33.555Z',
+      content: 'sebuah comment',
+    }];
 
     const thread = await getThreadByIdUseCase.execute('thread-123');
     expect(mockThreadRepository.getThreadById).toBeCalledWith('thread-123');
     expect(mockCommentRepository.getCommentByThread).toBeCalledWith('thread-123');
-    expect(mockReplyRepository.getReplyByComment).toBeCalledWith('comment-123');
+    expect(mockCommentRepository.getRepliesFromComment).toBeCalledWith(expectedComments);
 
     const expectedThread = {
       id: 'thread-123',
@@ -51,21 +65,22 @@ describe('GetThreadById', () => {
       username: 'dicoding',
     };
 
-    const expectedComments = [{
-      id: 'comment-123',
-      username: 'johndoe',
-      date: '2021-08-08T07:22:33.555Z',
-      content: 'sebuah comment',
-    }];
-    const expectedReply = {
+    const expectedFormattedReply = [{
       id: 'reply-123',
       username: 'johndoe',
       date: '2021-08-08T07:22:33.555Z',
-      content: 'sebuah reply',
-    };
+      content: 'sebuah comment',
+    },
+    {
+      id: 'reply-234',
+      username: 'dicoding',
+      date: '2021-09-11T07:22:33.555Z',
+      content: 'sebuah comment dri dicoding',
+    },
+    ];
 
     expectedThread.comments = expectedComments;
-    expectedThread.comments[0].replies = expectedReply;
+    expectedThread.comments[0].replies = expectedFormattedReply;
 
     expect(thread).toEqual(expectedThread);
   });
@@ -73,7 +88,6 @@ describe('GetThreadById', () => {
   it('Comment should be empty array', async () => {
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
-    const mockReplyRepository = new ReplyRepository();
 
     mockThreadRepository.getThreadById = jest.fn()
       .mockImplementation(() => Promise.resolve({
@@ -86,15 +100,18 @@ describe('GetThreadById', () => {
     mockCommentRepository.getCommentByThread = jest.fn()
       .mockImplementation(() => Promise.resolve());
 
+    mockCommentRepository.getRepliesFromComment = jest.fn()
+      .mockImplementation(() => Promise.resolve([]));
+
     const getThreadByIdUseCase = new GetThreadByIdUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
-      replyRepository: mockReplyRepository,
     });
 
     const thread = await getThreadByIdUseCase.execute('thread-123');
     expect(mockThreadRepository.getThreadById).toBeCalledWith('thread-123');
     expect(mockCommentRepository.getCommentByThread).toBeCalledWith('thread-123');
+    expect(mockCommentRepository.getRepliesFromComment).toBeCalledWith([]);
 
     const expectedThread = {
       id: 'thread-h_2FkLZhtgBKY2kh4CC02',
