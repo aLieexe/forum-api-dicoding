@@ -1,3 +1,5 @@
+const CommentsWithReplies = require('../../Domains/comments/entities/CommentsWithReplies');
+
 class GetThreadByIdUseCase {
   constructor({ threadRepository, commentRepository }) {
     this._threadRepository = threadRepository;
@@ -9,21 +11,9 @@ class GetThreadByIdUseCase {
     const comments = await this._commentRepository.getCommentByThread(threadId) || [];
     const replies = await this._commentRepository.getRepliesFromComment(comments);
 
-    const formattedComments = comments.map((comment) => ({
-      id: comment.id,
-      username: comment.username,
-      date: comment.date,
-      content: comment.content,
-      replies: replies.filter((reply) => reply.comment_id === comment.id)
-        .map((reply) => ({
-          id: reply.id,
-          content: reply.content,
-          date: reply.date,
-          username: reply.username,
-        })),
-    }));
+    const commentsWithReplies = new CommentsWithReplies(comments, replies);
 
-    thread.comments = formattedComments;
+    thread.comments = commentsWithReplies.comment;
 
     return thread;
   }
