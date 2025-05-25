@@ -38,7 +38,7 @@ jobs:
       env:
         NODE_ENV: test
         HOST: localhost
-        PORT: 4000
+        PORT: 5000
         
         PGHOST: localhost
         PGPORT: 4321

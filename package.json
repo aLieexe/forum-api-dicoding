@@ -16,7 +16,7 @@
     "migrate:test": "NODE_ENV=test node-pg-migrate",
     "reset": "npm run migrate down --count 69 && npm run migrate up",
     "reset:test": "npm run migrate:test down --count 69 && npm run migrate:test up",
-    "test:postman": "newman run postman-test/Forum_API_V1_Test.postman_collection.json -e postman-test/Forum_API_V1_Test.postman_environment.json"
+    "test:postman": "newman run postman-test/Forum_API_V2_Test.postman_collection.json -e postman-test/Forum_API_V2_Test.postman_environment.json"
   },
   "keywords": [],
   "author": "",

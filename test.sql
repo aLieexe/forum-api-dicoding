@@ -57,4 +57,19 @@ FROM
   reply r
   JOIN users u ON r.owner = u.id
 WHERE
-  comment_id = ANY ($1)
+  comment_id = ANY ($1);
+
+INSERT INTO likes(user_id, comment_id)
+  VALUES ('sdfhjkjkdsfajh', 'klfsdaklja')
+ON CONFLICT (user_id, comment_id)
+  DO UPDATE SET
+    is_liked = NOT likes.is_liked;
+
+SELECT
+  COUNT(comment_id)
+FROM
+  likes
+WHERE
+  comment_id = 'comment-3Ak6H2YRB46yLtWwJXj1s' AND is_liked = TRUE
+GROUP BY
+  comment_id;

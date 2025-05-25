@@ -102,7 +102,6 @@ class CommentRepositoryPostgres extends CommentRepository {
     comments.forEach((comment) => {
       commentsId.push(comment.id);
     });
-
     const query = {
       text: `SELECT
               r.id,
