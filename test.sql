@@ -73,3 +73,6 @@ WHERE
   comment_id = 'comment-3Ak6H2YRB46yLtWwJXj1s' AND is_liked = TRUE
 GROUP BY
   comment_id;
+
+
+drop table users

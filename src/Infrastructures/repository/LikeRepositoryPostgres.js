@@ -45,6 +45,7 @@ class LikeRepositoryPostgres extends LikeRepository {
       values: [commentsId],
     };
     const count = await this._pool.query(query);
+
     return count.rows;
   }
 }

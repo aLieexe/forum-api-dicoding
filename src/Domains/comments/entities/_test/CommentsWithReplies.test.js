@@ -10,8 +10,9 @@ describe('CommentsWithReplies', () => {
   it('should throw an error when payload did not meed data specification', () => {
     const comments = [];
     const replies = 123123;
+    const likes = [];
 
-    expect(() => new CommentsWithReplies(comments, replies)).toThrowError('COMMENTS_WITH_REPLIES.NOT_MEET_DATA_TYPE_SPECIFICATION');
+    expect(() => new CommentsWithReplies(comments, replies, likes)).toThrowError('COMMENTS_WITH_REPLIES.NOT_MEET_DATA_TYPE_SPECIFICATION');
   });
 
   it('should create a new Added Content correcly', () => {
@@ -38,7 +39,10 @@ describe('CommentsWithReplies', () => {
         comment_id: 'comment-vHoV-mh_x06W8kexwk7gU',
         content: 'sebuah balasan',
       }];
-    const addedComment = new CommentsWithReplies(comments, replies);
+    const likes = [
+      [{ comment_id: 'comment-vHoV-mh_x06W8kexwk7gU', count: '1' }],
+    ];
+    const addedComment = new CommentsWithReplies(comments, replies, likes);
 
     const expectedComment = {
       id: 'comment-vHoV-mh_x06W8kexwk7gU',

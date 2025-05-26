@@ -5,6 +5,7 @@ const CommentsTableTestHelper = require('../../../../tests/CommentsTableTestHelp
 
 const container = require('../../container');
 const createServer = require('../createServer');
+const LikeTestTableHelper = require('../../../../tests/LikesTableTestHelper');
 
 describe('/threads endpoint', () => {
   afterAll(async () => {
@@ -12,6 +13,7 @@ describe('/threads endpoint', () => {
   });
 
   afterEach(async () => {
+    await LikeTestTableHelper.cleanTable();
     await CommentsTableTestHelper.cleanTable();
     await ThreadsTableTestHelper.cleanTable();
     await UsersTableTestHelper.cleanTable();
@@ -62,6 +64,7 @@ describe('/threads endpoint', () => {
       await UsersTableTestHelper.addUser({});
       await ThreadsTableTestHelper.addThread({});
       await CommentsTableTestHelper.addComment({});
+      await LikeTestTableHelper.addLikes({});
       const server = await createServer(container);
 
       const threadId = 'thread-123';
