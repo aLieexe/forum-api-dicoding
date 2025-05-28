@@ -3,7 +3,7 @@ const pool = require('../src/Infrastructures/database/postgres/pool');
 
 const LikeTestTableHelper = {
   async cleanTable() {
-    await pool.query('DELETE FROM likes WHERE 1=1');
+    await pool.query('DELETE FROM likes');
   },
 
   async addLikes(

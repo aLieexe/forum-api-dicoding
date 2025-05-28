@@ -11,11 +11,11 @@ class LikeData {
 
   _verifyPayload({ commentId, threadId, userId }) {
     if (!commentId || !threadId || !userId) {
-      throw new Error('LIKE.NOT_CONTAIN_NEEDED_PROPERTY');
+      throw new Error('LIKE_DATA.NOT_CONTAIN_NEEDED_PROPERTY');
     }
 
     if (typeof commentId !== 'string' || typeof threadId !== 'string' || typeof userId !== 'string') {
-      throw new Error('LIKE.NOT_MEET_DATA_TYPE_SPECIFICATION');
+      throw new Error('LIKE_DATA.NOT_MEET_DATA_TYPE_SPECIFICATION');
     }
   }
 }

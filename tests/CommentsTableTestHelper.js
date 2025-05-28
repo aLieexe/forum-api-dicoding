@@ -27,9 +27,9 @@ const CommentsTableTestHelper = {
     };
 
     const data = await pool.query(query);
-    const addedThreads = new AddedComment(data.rows[0]);
+    const addedComments = new AddedComment(data.rows[0]);
 
-    return addedThreads;
+    return addedComments;
   },
 
 };

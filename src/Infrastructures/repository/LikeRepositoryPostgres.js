@@ -1,10 +1,9 @@
 const LikeRepository = require('../../Domains/likes/LikeRepository');
 
 class LikeRepositoryPostgres extends LikeRepository {
-  constructor(pool, idGenerator) {
+  constructor(pool) {
     super();
     this._pool = pool;
-    this._idGenerator = idGenerator;
   }
 
   async toggleLike(likeData) {
@@ -44,8 +43,8 @@ class LikeRepositoryPostgres extends LikeRepository {
       `,
       values: [commentsId],
     };
-    const count = await this._pool.query(query);
 
+    const count = await this._pool.query(query);
     return count.rows;
   }
 }
