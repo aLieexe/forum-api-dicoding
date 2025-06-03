@@ -4,57 +4,28 @@ on: push
 jobs:
   cd:
     runs-on: ubuntu-latest
-  
-    services:
-      postgres: 
-        image: postgres:16.6
-        env:
-          POSTGRES_USER: developer
-          POSTGRES_PASSWORD: supersecretpassword
-          POSTGRES_DB: forumapi_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 4321:5432
-  
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20.x
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Run migrations and tests
-      run: |
-        npx node-pg-migrate up
-        npx jest --setupFiles dotenv/config -i
-      env:
-        NODE_ENV: test
-        HOST: localhost
-        PORT: 5000
-        
-        PGHOST: localhost
-        PGPORT: 4321
-        PGUSER: developer
-        PGPASSWORD: supersecretpassword
-        PGDATABASE: forumapi_test
+      - name: checkout
+        uses: actions/checkout@v3
 
+      - name: Set up WARP
+        uses: fscarmen/warp-on-actions@v1.1
+        with:
+          stack: dual
 
-        PGHOST_TEST: localhost
-        PGPORT_TEST: 4321
-        PGUSER_TEST: developer
-        PGPASSWORD_TEST: supersecretpassword
-        PGDATABASE_TEST: forumapi_test
+      - name: testing ipv6 for command
+        run: |
+          curl -m 9 --ipv6 --verbose https://google.com
 
-        
-
-        ACCESS_TOKEN_KEY: secrets
-        REFRESH_TOKEN_KEY: secrets2
-        ACCESS_TOKEN_AGE: 3600
+      - name: testing ipv6
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          protocol: tcp6
+          port: ${{ secrets.SSH_PORT}}
+          command_timeout: 30s
+          script: |
+            whoami
