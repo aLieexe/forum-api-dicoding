@@ -14,11 +14,11 @@ jobs:
         with:
           stack: dual
 
-      - name: testing ipv6 for command
+      - name: testing ipv6 connection
         run: |
           curl -m 9 --ipv6 --verbose https://google.com
 
-      - name: testing ipv6
+      - name: the deployment
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -29,3 +29,8 @@ jobs:
           command_timeout: 30s
           script: |
             whoami
+            cd forum-api-dicoding/
+            git pull
+            npm install
+            npm run migrate up
+            pm2 restart forum-api-dicoding
