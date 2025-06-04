@@ -11,10 +11,10 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
 
-      # - name: Set up WARP
-      #   uses: fscarmen/warp-on-actions@v1.1
-      #   with:
-      #     stack: dual
+      - name: Set up WARP
+        uses: fscarmen/warp-on-actions@v1.1
+        with:
+          stack: dual
 
       - name: testing ipv6 connection
         run: |
