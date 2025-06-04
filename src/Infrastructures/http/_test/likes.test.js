@@ -38,7 +38,7 @@ describe('likes http tests', () => {
         },
       });
 
-      expect(response.statusCode).toEqual(200);
+      expect(response.statusCode).toEqual(201);
     });
     it('should response 404 when not resource doesnt exist', async () => {
       const token = await UsersTableTestHelper.getAccessTokenForTestUser();
